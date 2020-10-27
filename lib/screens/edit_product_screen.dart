@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_complete_guide/providers/product.dart';
+import 'package:flutter_complete_guide/providers/products.dart';
+import 'package:provider/provider.dart';
 
 class EditProductScreen extends StatefulWidget {
   static const String routeName = '/editProduct';
@@ -32,14 +34,25 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
   void updateImageUrl() {
     if (!_imageUrlFocusNode.hasFocus) {
+      if (_imageUrlController.text.isEmpty) {
+        return;
+      }
+      if (!_imageUrlController.text.startsWith('http') || !_imageUrlController.text.startsWith('https')) {
+        return;
+      }
+      if (!_imageUrlController.text.endsWith('.png') || !_imageUrlController.text.endsWith('.jpg')) {
+        return;
+      }
       setState(() {});
     }
   }
 
   void _saveForm() {
-    final _isValid = _form.currentState.validate(); //Validates the form 
-    if(!_isValid) return; //Validate returns bool if validate is correct
+    final _isValid = _form.currentState.validate(); //Validates the form
+    if (!_isValid) return; //Validate returns bool if validate is correct
     _form.currentState.save();
+    Provider.of<Products>(context, listen: false).addProduct(_editedProduct);
+    Navigator.of(context).pop();
   }
 
   @override
@@ -91,6 +104,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
                 textInputAction: TextInputAction.next, //To the next input icon
                 keyboardType: TextInputType.number,
                 focusNode: _priceFocusNode,
+                validator: (value) {
+                  if (value.isEmpty) return 'Enter a price.';
+                  if (double.tryParse(value) == null) return 'Please, enter a valid number';
+                  if (double.parse(value) <= 0) return 'Please enter a number > 0';
+                  return null;
+                },
                 onFieldSubmitted: (_) {
                   FocusScope.of(context).requestFocus(_descriptionFocusNode); //TO FOCUS NODE
                 },
@@ -109,6 +128,15 @@ class _EditProductScreenState extends State<EditProductScreen> {
                 maxLines: 3,
                 keyboardType: TextInputType.multiline,
                 focusNode: _descriptionFocusNode,
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'Please, enter a description';
+                  }
+                  if (value.length < 10) {
+                    return 'Enter a longer description';
+                  }
+                  return null;
+                },
                 onSaved: (value) {
                   _editedProduct = Product(
                     title: _editedProduct.title,
@@ -143,6 +171,18 @@ class _EditProductScreenState extends State<EditProductScreen> {
                       textInputAction: TextInputAction.done,
                       controller: _imageUrlController,
                       focusNode: _imageUrlFocusNode,
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return 'Please enter an image URL';
+                        }
+                        if (!value.startsWith('http') || !value.startsWith('https')) {
+                          return 'Please enter a valid URL.';
+                        }
+                        if (!value.endsWith('.png') || !value.endsWith('.jpg')) {
+                          return 'Please enter a valid image URL.';
+                        }
+                        return null;
+                      },
                       onFieldSubmitted: (_) {
                         _saveForm();
                       },
