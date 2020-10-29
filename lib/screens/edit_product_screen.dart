@@ -77,7 +77,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
   void _saveForm() {
     final _isValid = _form.currentState.validate(); //Validates the form
-    if (!_isValid) return; //Validate returns bool if validate is correct
+   // if (!_isValid) return; //Validate returns bool if validate is correct
     _form.currentState.save();
     if (_editedProduct.id != null) {
       Provider.of<Products>(context, listen: false).updateProduct(_editedProduct.id, _editedProduct);
@@ -206,13 +206,14 @@ class _EditProductScreenState extends State<EditProductScreen> {
                       controller: _imageUrlController,
                       focusNode: _imageUrlFocusNode,
                       validator: (value) {
+                        print(value.endsWith('.jpg'));
                         if (value.isEmpty) {
                           return 'Please enter an image URL';
                         }
-                        if (!value.startsWith('http') || !value.startsWith('https')) {
+                        if (!value.startsWith('http') && !value.startsWith('https')) {
                           return 'Please enter a valid URL.';
                         }
-                        if (!value.endsWith('.png') || !value.endsWith('.jpg')) {
+                        if (!value.endsWith('.png') && !value.endsWith('.jpg')) {
                           return 'Please enter a valid image URL.';
                         }
                         return null;
