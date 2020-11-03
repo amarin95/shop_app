@@ -60,18 +60,39 @@ class Products with ChangeNotifier {
     return _items.firstWhere((prod) => prod.id == id);
   }
 
-  void addProduct(Product product) {
+  Future<void> fetchAndSetProducts() async {
     const url = 'https://flutter-test-9731d.firebaseio.com/products.json';
-    http.post(url, body: json.encode({'title': product.title, 'description': product.description, 'imageUrl': product.imageUrl, 'price': product.price, 'isFavorite': product.isFavorite}));
-    final newProduct = Product(
-      title: product.title,
-      description: product.description,
-      price: product.price,
-      imageUrl: product.imageUrl,
-      id: DateTime.now().toString(),
-    );
-    _items.add(newProduct);
-    notifyListeners();
+    try {
+      final response = await http.get(url);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  Future<void> addProduct(Product product) async {
+    const url = 'https://flutter-test-9731d.firebaseio.com/products.json';
+    try {
+      final response = await http.post(url,
+          body: json.encode({
+            'title': product.title,
+            'description': product.description,
+            'imageUrl': product.imageUrl,
+            'price': product.price,
+            'isFavorite': product.isFavorite,
+          }));
+      final newProduct = Product(
+        title: product.title,
+        description: product.description,
+        price: product.price,
+        imageUrl: product.imageUrl,
+        id: json.decode(response.body)['name'],
+      );
+
+      _items.add(newProduct);
+      notifyListeners();
+    } catch (error) {
+      throw error;
+    }
   }
 
   void updateProduct(String id, Product newProduct) {
