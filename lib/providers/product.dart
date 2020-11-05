@@ -1,6 +1,10 @@
-import 'package:flutter/foundation.dart';
+import 'dart:convert';
 
-class Product with ChangeNotifier{
+import 'package:flutter/foundation.dart';
+import 'package:flutter_complete_guide/models/http_exception.dart';
+import 'package:http/http.dart' as http;
+
+class Product with ChangeNotifier {
   final String id;
   final String title;
   final String description;
@@ -17,8 +21,23 @@ class Product with ChangeNotifier{
     this.isFavorite = false,
   });
 
-  void toggleFavoriteStatus(){
+  void _setFavValue(bool newValue) {
+    isFavorite = newValue;
+  }
+
+  void toggleFavoriteStatus() async {
+    final oldStatus = isFavorite;
+    final url = 'https://flutter-test-9731d.firebaseio.com/products/$id.json';
     isFavorite = !isFavorite;
     notifyListeners();
+    try {
+      final response = await http.patch(url, body: json.encode({'isFavorite': isFavorite}));
+      if (response.statusCode >= 400) {
+        _setFavValue(oldStatus);
+        throw HttpException('Something went wrong');
+      }
+    } catch (error) {
+      _setFavValue(oldStatus);
+    }
   }
 }
