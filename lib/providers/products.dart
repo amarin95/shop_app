@@ -5,6 +5,9 @@ import 'dart:convert';
 import 'product.dart';
 
 class Products with ChangeNotifier {
+  final String authToken;
+
+  Products(this.authToken, this._items);
   List<Product> _items = [
     // Product(
     //   id: 'p1',
@@ -62,11 +65,11 @@ class Products with ChangeNotifier {
   }
 
   Future<void> fetchAndSetProducts() async {
-    const url = 'https://flutter-test-9731d.firebaseio.com/products.json';
+    final url = 'https://flutter-test-9731d.firebaseio.com/products.json?auth=$authToken';
     try {
       final response = await http.get(url);
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
-       if (extractedData == null) return;
+      if (extractedData == null) return;
       final List<Product> loadedProducts = [];
       extractedData.forEach((prodId, prodData) {
         loadedProducts
