@@ -27,14 +27,14 @@ class Product with ChangeNotifier {
 
   void toggleFavoriteStatus() async {
     final oldStatus = isFavorite;
-    final url = 'https://flutter-test-9731d.firebaseio.com/products/$id.json';
+    final url = 'https://flutter-test-9731d.firebaseio.com/userFavorites/$id.json';
     isFavorite = !isFavorite;
     notifyListeners();
     try {
       final response = await http.patch(url, body: json.encode({'isFavorite': isFavorite}));
       if (response.statusCode >= 400) {
         _setFavValue(oldStatus);
-        throw HttpException('Something went wrong');
+        throw HttpException('Something went wrong...');
       }
     } catch (error) {
       _setFavValue(oldStatus);
